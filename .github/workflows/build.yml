@@ -1,43 +1,47 @@
-name: Cross-platform Build
+name: Multi-OS Workflow
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    
+
     steps:
-    - uses: actions/checkout@v2
+      # Common steps for all OSes
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Common steps for all OSes
-    - name: Common Step 1
-      run: echo "This step runs on all OSes"
+      - name: Common step 2
+        run: echo "This step runs on all OSes"
 
-    - name: Common Step 2
-      run: echo "Another common step"
+      # OS-specific steps
+      - name: Run Linux commands
+        if: runner.os == 'Linux'
+        uses: docker/run-action@v2
+        with:
+          image: your-docker-image  # Replace with your Docker image
+          options: --entrypoint /bin/sh
+          args: -c "your linux commands here" # Replace with your commands
 
-    # OS-specific steps
-    - name: Linux-specific step
-      if: runner.os == 'Linux'
-      uses: docker://your-docker-image:tag
-      with:
-        args: your-linux-command
+      - name: Run macOS commands
+        if: runner.os == 'macOS'
+        run: |
+          brew update  # Example macOS command
+          brew install your-package  # Example macOS command
 
-    - name: macOS-specific step
-      if: runner.os == 'macOS'
-      run: |
-        echo "Running macOS-specific commands"
-        # Add your macOS-specific commands here
+      - name: Run Windows commands
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install your-package -y  # Example Windows command
+          # More Windows commands here
 
-    - name: Windows-specific step
-      if: runner.os == 'Windows'
-      run: |
-        echo "Running Windows-specific commands"
-        # Add your Windows-specific commands here
-
-    # More common steps
-    - name: Final common step
-      run: echo "This step runs on all OSes again"
+      # More common steps after OS-specific actions
+      - name: Common step 3
+        run: echo "This step also runs on all OSes after OS-specific steps"
