@@ -1,0 +1,43 @@
+name: Cross-platform Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    # Common steps for all OSes
+    - name: Common Step 1
+      run: echo "This step runs on all OSes"
+
+    - name: Common Step 2
+      run: echo "Another common step"
+
+    # OS-specific steps
+    - name: Linux-specific step
+      if: runner.os == 'Linux'
+      uses: docker://your-docker-image:tag
+      with:
+        args: your-linux-command
+
+    - name: macOS-specific step
+      if: runner.os == 'macOS'
+      run: |
+        echo "Running macOS-specific commands"
+        # Add your macOS-specific commands here
+
+    - name: Windows-specific step
+      if: runner.os == 'Windows'
+      run: |
+        echo "Running Windows-specific commands"
+        # Add your Windows-specific commands here
+
+    # More common steps
+    - name: Final common step
+      run: echo "This step runs on all OSes again"
